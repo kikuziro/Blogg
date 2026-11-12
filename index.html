@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>나의 블로그</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #fffdf6;
+    --ink: #111;
+    --soft: #3d3d3d;
+    --line: #b89455;
+    --chip: #ee861c;
+    --paper: #f5f5f5;
+    --font: "Gulim Che", "굴림체", Gulim, "굴림", "Dotum Che", Dotum, "Nanum Gothic Coding", monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--sky); color: var(--ink);
+    font-family: var(--font); font-size: 13px; line-height: 1.6; letter-spacing: -0.04em;
+  }
+  a { color: inherit; text-decoration: none; }
+  button, input { font: inherit; color: inherit; letter-spacing: inherit; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 36px 20px 90px; }
+
+  header { text-align: center; margin-bottom: 26px; }
+  .site-name { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; margin: 0 0 4px; }
+  .hint { font-style: italic; color: var(--soft); font-size: 12px; margin: 0 0 8px; }
+  .btn {
+    display: inline-block; padding: 1px 6px; background: var(--paper); border: 1px solid #999;
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,.75), 1px 1px 0 rgba(0,0,0,.25); cursor: pointer;
+  }
+  .btn:active { box-shadow: inset 1px 1px 0 rgba(0,0,0,.25); transform: translate(1px,1px); }
+  .btn.primary { background: var(--chip); color: #fff; border-color: var(--chip); }
+  .btn[disabled] { opacity: .5; cursor: default; }
+
+  nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 18px auto 0; max-width: 620px; }
+  .tag-btn {
+    display: inline-flex; align-items: center; gap: 5px; padding: 2px 6px 2px 5px;
+    border: 1px solid var(--line); border-radius: 2px; background: transparent;
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,.85), inset -1px -1px 0 rgba(200,180,140,.3); cursor: pointer;
+  }
+  .tag-btn:hover { background: rgba(255,255,255,.7); }
+  .tag-btn.active { background: var(--chip); color: #fff; border-color: var(--chip); box-shadow: none; }
+  button:focus-visible, input:focus-visible { outline: 2px dotted var(--ink); outline-offset: 2px; }
+  .count { color: var(--soft); font-size: 11px; text-align: center; margin: 14px 0 22px; }
+  .note { text-align: center; color: #a33; font-size: 12px; margin: 10px 0 0; }
+
+  .grid { columns: 5 130px; column-gap: 18px; }
+  .card { break-inside: avoid; margin: 0 0 22px; }
+  .thumb {
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--line); font-size: 30px; color: rgba(0,0,0,.55);
+    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.35) 0 2px, transparent 2px 8px);
+  }
+  img.thumb { display: block; width: 100%; height: auto; background: #fff; }
+  .card-title { margin: 5px 0 0; font-size: 12px; line-height: 1.45; word-break: keep-all; overflow-wrap: anywhere; }
+  .card.pick .thumb { outline: 2px solid var(--chip); outline-offset: 2px; }
+  .card.pick .card-title { color: var(--chip); font-weight: 700; }
+  .tools { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
+  .tools .btn { font-size: 11px; padding: 0 4px; }
+  .empty { text-align: center; color: var(--soft); padding: 40px 0; }
+
+  .card > a { display: block; }
+  .card > a:hover .card-title { text-decoration: underline; }
+  .chips { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 4px; }
+  .chip { background: var(--chip); color: #fff; border: 1px solid #f8e8c6; padding: 0 3px; font-size: 10px; line-height: 1.4; }
+
+  /* 게시물 화면 */
+  article { max-width: 560px; margin: 0 auto; }
+  .back { display: inline-block; margin-bottom: 16px; }
+  .back:hover { color: var(--chip); }
+  article h1 { font-size: 17px; line-height: 1.4; margin: 0 0 6px; word-break: keep-all; overflow-wrap: anywhere; letter-spacing: -0.02em; }
+  article .thumb { margin-top: 14px; }
+  article div.thumb { height: 220px; font-size: 54px; }
+  .comments { margin-top: 30px; border-top: 1px dashed var(--line); padding-top: 14px; }
+  .comments h2 { font-size: 13px; margin: 0 0 10px; }
+  .cmt { padding: 7px 0; border-bottom: 1px dotted #d9c9a6; }
+  .cmeta { font-size: 11px; color: var(--soft); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .cmeta .btn { font-size: 10px; padding: 0 4px; }
+  .cbody { white-space: pre-wrap; overflow-wrap: anywhere; margin-top: 2px; }
+  .cempty { color: var(--soft); font-size: 12px; margin: 0; }
+  #cform { display: flex; gap: 6px; align-items: flex-end; margin-top: 12px; }
+  #ctext { flex: 1; min-width: 0; padding: 5px 6px; border: 1px solid #888; background: #fff; font: inherit; color: inherit; resize: vertical; }
+
+  footer { text-align: center; margin-top: 46px; color: var(--soft); font-size: 11px; }
+  footer a { display: inline-block; font-size: 13px; color: var(--ink); margin-bottom: 6px; }
+  footer a:hover { color: var(--chip); }
+
+  /* 편집 막대 */
+  .editbar {
+    position: fixed; right: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end;
+    max-width: calc(100vw - 24px); padding: 6px 8px; background: #fff; border: 1px solid #111;
+    box-shadow: 2px 2px 0 rgba(0,0,0,.3); z-index: 10; font-size: 12px;
+  }
+
+  /* 편집 창 */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 20; }
+  .dialog { width: 100%; max-width: 380px; max-height: 100%; overflow: auto; background: #fff; border: 1px solid #111; box-shadow: 3px 3px 0 rgba(0,0,0,.35); padding: 14px 16px 16px; font-size: 13px; }
+  .dialog h2 { font-size: 14px; margin: 0 0 12px; }
+  .field { margin-bottom: 12px; }
+  .field > label, .field > .lbl { display: block; font-size: 11px; color: var(--soft); margin-bottom: 3px; }
+  .field input[type=text] { width: 100%; padding: 4px 6px; border: 1px solid #888; background: #fff; }
+  .checks { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+  .checks label { display: inline-flex; align-items: center; gap: 3px; cursor: pointer; }
+  .preview { max-width: 140px; max-height: 140px; display: block; border: 1px solid var(--line); margin-bottom: 6px; }
+  .row { display: flex; gap: 5px; align-items: center; margin-bottom: 5px; }
+  .row input.sym { width: 38px; text-align: center; flex: none; }
+  .row input.nm { flex: 1; min-width: 0; }
+  .syms { display: flex; flex-wrap: wrap; gap: 2px; margin: 6px 0 2px; }
+  .syms button { width: 22px; height: 22px; padding: 0; border: 1px solid #ccc; background: #fff; cursor: pointer; }
+  .actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 14px; }
+  .err { color: #a33; font-size: 12px; min-height: 1.2em; margin-top: 6px; }
+  #cform { flex-wrap: wrap; }
+  #cname { width: 120px; padding: 4px 6px; border: 1px solid #888; background: #fff; }
+  #ctext { flex-basis: 100%; }
+  .admin { background: none; border: 0; padding: 0; margin-top: 8px; color: #b9b3a3; font-size: 10px; cursor: pointer; }
+  .admin:hover { color: var(--ink); }
+  /* 턴테이블 */
+  .deck { width: 264px; padding: 12px; background: #fffdf6; border: 1px solid var(--line); box-shadow: 2px 2px 0 rgba(0,0,0,.18); font-size: 12px; z-index: 9; }
+  .deck-top { border: 1px solid var(--line); background: #f1e6c9; }
+  #tt { display: block; width: 100%; height: auto; touch-action: none; user-select: none; -webkit-user-select: none; }
+  #arm { transform-box: view-box; transform-origin: 238px 38px; transition: transform .45s; }
+  #disc { cursor: grab; outline: none; }
+  #disc:focus-visible #discLabel { stroke: #fffdf6; stroke-width: 3; }
+  #discSpin { transform-box: view-box; transform-origin: 112px 105px; animation: spin 1.8s linear infinite; animation-play-state: paused; }
+  .deck.playing #discSpin { animation-play-state: running; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { #discSpin { animation-duration: 12s; } #arm, .lp-disc, .knob { transition: none !important; } }
+  .deck-info { margin: 8px 0; min-height: 34px; }
+  .deck-state { font-size: 11px; color: var(--soft); }
+  .deck-title { font-weight: 700; font-size: 13px; overflow-wrap: anywhere; }
+  #ytbox { margin-bottom: 8px; border: 1px solid var(--line); background: #000; line-height: 0; }
+  .crate { display: flex; flex-wrap: wrap; gap: 8px 2px; border-top: 1px dashed var(--line); padding-top: 10px; max-height: 210px; overflow: auto; }
+  .lp { width: 79px; height: 62px; padding: 0; border: 0; background: none; cursor: grab; touch-action: none; position: relative; text-align: left; user-select: none; -webkit-user-select: none; }
+  .lp-disc, .lp-ghost { border-radius: 50%; background: radial-gradient(circle, #fffdf6 0 5%, var(--c) 6% 36%, #161616 37% 100%); }
+  .lp-disc { position: absolute; left: 4px; top: 6px; width: 50px; height: 50px; transition: left .28s; }
+  .lp.out .lp-disc { left: 28px; }
+  .lp.on .lp-disc { visibility: hidden; }
+  .sleeve { position: absolute; left: 0; top: 3px; width: 56px; height: 56px; border: 1px solid #5c4a22; box-shadow: 1px 1px 0 rgba(0,0,0,.2); display: flex; align-items: flex-end; padding: 3px; overflow: hidden; }
+  .sl-title { font-size: 9px; line-height: 1.2; max-height: 3.6em; overflow: hidden; overflow-wrap: anywhere; color: #111; }
+  .lp.on .sleeve { outline: 2px solid var(--chip); outline-offset: 1px; }
+  .lp-ghost { position: fixed; width: 96px; height: 96px; margin: -48px 0 0 -48px; pointer-events: none; z-index: 30; box-shadow: 3px 3px 0 rgba(0,0,0,.25); }
+  .deck-off { margin-top: 6px; font-size: 11px; }
+  .radio { display: flex; align-items: center; gap: 10px; border-top: 1px dashed var(--line); margin-top: 10px; padding-top: 10px; }
+  .radio-win { flex: 1; min-width: 0; border: 1px solid #5c4a22; background: #fff; padding: 5px 7px; font-size: 11px; overflow-wrap: anywhere; }
+  .knob { flex: none; width: 48px; height: 48px; border-radius: 50%; background: #5c4a22; position: relative; cursor: grab; touch-action: none; transition: transform .2s; box-shadow: 1px 1px 0 rgba(0,0,0,.3); }
+  .knob.drag { transition: none; cursor: grabbing; }
+  .knob::after { content: ""; position: absolute; left: 23px; top: 4px; width: 2px; height: 14px; background: #fffdf6; }
+  .deck-help { margin: 8px 0 0; font-size: 10px; color: var(--soft); line-height: 1.4; }
+  #deckToggle { position: fixed; left: 12px; bottom: 12px; z-index: 10; width: 44px; height: 44px; font-size: 18px; padding: 0; }
+  @media (min-width: 1180px) {
+    body { padding-right: 300px; }
+    .deck { position: fixed; right: 20px; top: 50px; max-height: calc(100vh - 70px); overflow: auto; }
+    #deckToggle { display: none; }
+    .editbar { right: 316px; }
+  }
+  @media (max-width: 1179.98px) {
+    .deck { position: fixed; left: 12px; bottom: 64px; max-height: calc(100vh - 90px); overflow: auto; display: none; }
+    .deck.open { display: block; }
+  }
+  [hidden] { display: none !important; }
+  @media (max-width: 520px) { .grid { columns: 2; } .wrap { padding-top: 24px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="site-name" id="siteName"></p>
+    <p class="hint" id="hint"></p>
+    <button class="btn" id="lucky" type="button"></button>
+    <nav id="tags" aria-label="태그"></nav>
+    <p class="note" id="note" hidden></p>
+  </header>
+
+  <main>
+    <section id="list">
+      <p class="count" id="count"></p>
+      <div class="grid" id="grid"></div>
+    </section>
+    <article id="post" hidden>
+      <a class="back" href="#home">← 목록으로</a>
+      <div id="postHead"></div>
+      <section class="comments">
+        <h2>댓글 <span id="ccount"></span></h2>
+        <div id="clist"></div>
+        <form id="cform">
+          <input type="text" id="cname" maxlength="20" placeholder="닉네임" aria-label="닉네임">
+          <button class="btn primary" type="submit" id="csend">등록</button>
+          <textarea id="ctext" rows="2" maxlength="500" placeholder="댓글을 남겨 보세요" aria-label="댓글"></textarea>
+        </form>
+        <p class="note" id="cnote" hidden></p>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <a href="#" id="toTop">↑ TOP</a><br>
+    <span id="updated"></span><br>
+    <button type="button" class="admin" id="admin">관리자</button>
+  </footer>
+</div>
+
+<aside class="deck" id="deck" aria-label="턴테이블">
+  <div class="deck-top">
+    <svg id="tt" viewBox="0 0 280 210" role="group" aria-label="턴테이블">
+      <circle id="platter" cx="112" cy="105" r="96" fill="#d9c9a0"></circle>
+      <circle cx="112" cy="105" r="4" fill="#8c7440"></circle>
+      <g id="disc" hidden tabindex="0" role="button" aria-label="올려진 판: 누르면 재생·멈춤">
+        <g id="discSpin">
+          <circle cx="112" cy="105" r="88" fill="#161616"></circle>
+          <circle cx="112" cy="105" r="79" fill="none" stroke="#3a3a3a"></circle>
+          <circle cx="112" cy="105" r="68" fill="none" stroke="#3a3a3a"></circle>
+          <circle cx="112" cy="105" r="57" fill="none" stroke="#3a3a3a"></circle>
+          <circle cx="112" cy="105" r="46" fill="none" stroke="#3a3a3a"></circle>
+          <circle id="discLabel" cx="112" cy="105" r="32" fill="#ee861c"></circle>
+          <rect x="108" y="78" width="8" height="12" fill="rgba(0,0,0,.45)"></rect>
+          <rect x="96" y="118" width="32" height="3" fill="rgba(0,0,0,.35)"></rect>
+          <circle cx="112" cy="105" r="3" fill="#fffdf6"></circle>
+        </g>
+      </g>
+      <circle cx="238" cy="38" r="14" fill="#8c7440"></circle>
+      <g id="arm" aria-hidden="true">
+        <line x1="238" y1="38" x2="238" y2="146" stroke="#5c4a22" stroke-width="5" stroke-linecap="round"></line>
+        <rect x="229" y="140" width="18" height="24" rx="2" fill="#333"></rect>
+        <circle cx="238" cy="38" r="6" fill="#f1e6c9"></circle>
+      </g>
+    </svg>
+  </div>
+  <div class="deck-info" aria-live="polite">
+    <div class="deck-state" id="deckState"></div>
+    <div class="deck-title" id="deckTitle"></div>
+  </div>
+  <div id="ytbox" hidden><div id="yt"></div></div>
+  <div class="crate" id="shelf"></div>
+  <button type="button" class="btn deck-off" id="deckOff" hidden>판 내리기</button>
+  <div class="radio" id="radio" hidden>
+    <div class="radio-win" id="radioWin">라디오 꺼짐</div>
+    <div class="knob" id="knob" role="slider" tabindex="0" aria-label="라디오 다이얼" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="꺼짐"></div>
+  </div>
+  <p class="deck-help">재킷을 누르면 판이 나옵니다. 판을 끌어 턴테이블에 올리면 재생되고, 들어내면 멈춥니다. 다이얼을 돌리면 라디오가 나옵니다.</p>
+</aside>
+<button type="button" class="btn" id="deckToggle" aria-label="턴테이블 열기·닫기" aria-expanded="false">♬</button>
+
+<div class="editbar" id="editbar" hidden></div>
+<div class="overlay" id="overlay" hidden><div class="dialog" id="dialog" role="dialog" aria-modal="true"></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, collection, onSnapshot, setDoc, updateDoc, deleteDoc, addDoc, getDoc, getDocs, query, orderBy, serverTimestamp, writeBatch }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDPJi3U5-lBwlbg0cV2uTzDdZ0pkFDLyoY",
+  authDomain: "my-blog-38b2e.firebaseapp.com",
+  projectId: "my-blog-38b2e",
+  storageBucket: "my-blog-38b2e.firebasestorage.app",
+  messagingSenderId: "210846706563",
+  appId: "1:210846706563:web:031b54c1c002b3e9d024b6"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const mainRef = doc(db, "blog", "main");
+
+const COLORS = ["#ffd9e0", "#fff3b8", "#cdeccd", "#c9d9ff", "#ffe0c2", "#e3d4f7", "#bfe8ea", "#f4f4f4"];
+const HEIGHTS = [96, 150, 120, 178, 108, 138];
+const SYMBOLS = ["◎", "※", "♨", "♤", "♣", "♥", "◈", "■", "▣", "▤", "☆", "★", "♬", "☞", "✉", "▽", "△", "○", "●", "☁", "☂", "✿", "♧", "◇"];
+const EMPTY = { name: "나의 블로그", hint: "뭘 볼지 모르겠다면...", button: "아무거나 ☁", tags: [], updated: "" };
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const okImg = s => typeof s === "string" && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(s);
+const postId = () => (location.hash.match(/^#post-([A-Za-z0-9]+)$/) || [])[1] || null;
+const chips = p => p.tags.length ? `<div class="chips">${p.tags.map(t => `<span class="chip">${esc(t)}</span>`).join("")}</div>` : "";
+const today = () => { const d = new Date(), z = n => String(n).padStart(2, "0"); return `${String(d.getFullYear()).slice(2)}.${z(d.getMonth() + 1)}.${z(d.getDate())}.`; };
+
+let site = clone(EMPTY), posts = [], loaded = false;
+let current = "전체", editing = false, canEdit = false;
+let cPid = null, cUnsub = null, cDocs = [];
+
+function normSite(d) {
+  const o = Object.assign(clone(EMPTY), d || {});
+  o.tags = (Array.isArray(o.tags) ? o.tags : []).filter(t => t && t.name).map(t => ({ name: String(t.name), symbol: String(t.symbol || "◎") }));
+  return o;
+}
+function note(msg) { $("note").textContent = msg || ""; $("note").hidden = !msg; }
+function fail() { note("저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요."); }
+function touch() { return setDoc(mainRef, { updated: today() }, { merge: true }); }
+
+/* ───── 화면 그리기 ───── */
+function render() {
+  document.title = site.name;
+  $("siteName").textContent = site.name;
+  $("hint").textContent = site.hint;
+  $("lucky").textContent = site.button;
+  $("updated").textContent = site.updated ? "Updated " + site.updated : "";
+  $("admin").hidden = canEdit;
+  if (current !== "전체" && !site.tags.some(t => t.name === current)) current = "전체";
+
+  const all = [{ name: "전체", symbol: "◎" }, ...site.tags];
+  $("tags").innerHTML = all.map(t =>
+    `<button type="button" class="tag-btn${t.name === current ? " active" : ""}" data-tag="${esc(t.name)}" aria-pressed="${t.name === current}">${esc(t.symbol)} ${esc(t.name)}</button>`
+  ).join("");
+
+  const pid = postId();
+  $("list").hidden = !!pid;
+  $("post").hidden = !pid;
+  watchComments(pid);
+  if (pid) renderPost(pid);
+
+  const sym = Object.fromEntries(site.tags.map(t => [t.name, t.symbol]));
+  const shown = posts.map((p, i) => [p, i]).filter(([p]) => current === "전체" || p.tags.includes(current));
+  $("count").textContent = `${current} · ${shown.length}개`;
+  $("grid").innerHTML = shown.length ? shown.map(([p, i]) => {
+    const thumb = p.img
+      ? `<img class="thumb" src="${p.img}" alt="" loading="lazy">`
+      : `<div class="thumb" style="height:${HEIGHTS[i % HEIGHTS.length]}px;background-color:${COLORS[i % COLORS.length]}" aria-hidden="true">${esc(sym[p.tags[0]] || "◎")}</div>`;
+    const tools = editing ? `<div class="tools">
+        <button type="button" class="btn" data-act="up" title="앞으로">◀</button>
+        <button type="button" class="btn" data-act="down" title="뒤로">▶</button>
+        <button type="button" class="btn" data-act="edit">수정</button>
+        <button type="button" class="btn" data-act="del">삭제</button></div>` : "";
+    return `<div class="card" data-id="${esc(p.id)}"><a href="#post-${esc(p.id)}">${thumb}<div class="card-title">${esc(p.title)}</div></a>${chips(p)}${tools}</div>`;
+  }).join("") : `<p class="empty">${!loaded ? "불러오는 중..." : editing ? "아래 ‘＋ 새 항목’으로 추가해 보세요." : "아직 아무것도 없습니다."}</p>`;
+
+  $("editbar").hidden = !canEdit;
+  $("editbar").innerHTML = editing
+    ? `<button type="button" class="btn primary" data-bar="add">＋ 새 항목</button>
+       <button type="button" class="btn" data-bar="tags">태그 관리</button>
+       <button type="button" class="btn" data-bar="site">이름·문구</button>
+       <button type="button" class="btn" data-bar="lps">LP 관리</button>
+       <button type="button" class="btn" data-bar="radio">라디오 관리</button>
+       <button type="button" class="btn" data-bar="done">편집 끝내기</button>`
+    : `<button type="button" class="btn" data-bar="start">✎ 편집</button>
+       <button type="button" class="btn" data-bar="logout">로그아웃</button>`;
+}
+
+/* ───── 게시물 화면 ───── */
+function renderPost(pid) {
+  const i = posts.findIndex(x => x.id === pid);
+  if (i < 0) { $("postHead").innerHTML = `<p class="empty">${loaded ? "없는 게시물입니다." : "불러오는 중..."}</p>`; return; }
+  const p = posts[i];
+  const sym = Object.fromEntries(site.tags.map(t => [t.name, t.symbol]));
+  const photo = p.img
+    ? `<img class="thumb" src="${p.img}" alt="">`
+    : `<div class="thumb" style="background-color:${COLORS[i % COLORS.length]}" aria-hidden="true">${esc(sym[p.tags[0]] || "◎")}</div>`;
+  $("postHead").innerHTML = `<h1>${esc(p.title)}</h1>${chips(p)}${photo}` +
+    (editing ? `<div class="tools"><button type="button" class="btn" data-post-edit="${esc(p.id)}">수정</button></div>` : "");
+}
+
+/* ───── 댓글 ───── */
+const cCol = pid => collection(db, "posts", pid, "comments");
+function cNote(msg) { $("cnote").textContent = msg || ""; $("cnote").hidden = !msg; }
+function watchComments(pid) {
+  if (pid === cPid) return;
+  if (cUnsub) { cUnsub(); cUnsub = null; }
+  cPid = pid; cDocs = []; cNote(""); renderComments();
+  if (!pid) return;
+  cUnsub = onSnapshot(query(cCol(pid), orderBy("at")),
+    s => { cDocs = s.docs.map(d => Object.assign({ id: d.id }, d.data({ serverTimestamps: "estimate" }))); renderComments(); },
+    () => cNote("댓글을 불러오지 못했습니다."));
+}
+function when(ts) {
+  const d = ts && ts.toDate ? ts.toDate() : new Date(), z = n => String(n).padStart(2, "0");
+  return `${String(d.getFullYear()).slice(2)}.${z(d.getMonth() + 1)}.${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;
+}
+function renderComments() {
+  $("ccount").textContent = cDocs.length ? `(${cDocs.length})` : "";
+  $("clist").innerHTML = cDocs.length ? cDocs.map(c => {
+    const del = canEdit ? `<button type="button" class="btn" data-cdel="${esc(c.id)}">삭제</button>` : "";
+    return `<div class="cmt"><div class="cmeta"><b>${esc(c.name || "익명")}</b><span>${when(c.at)}</span>${del}</div><div class="cbody">${esc(c.text || "")}</div></div>`;
+  }).join("") : `<p class="cempty">아직 댓글이 없습니다.</p>`;
+}
+try { $("cname").value = localStorage.getItem("blog-nick") || ""; } catch (e) {}
+$("cform").addEventListener("submit", async e => {
+  e.preventDefault();
+  const name = $("cname").value.trim().slice(0, 20), text = $("ctext").value.trim().slice(0, 500), pid = postId();
+  if (!pid) return;
+  if (!name) { cNote("닉네임을 적어 주세요."); $("cname").focus(); return; }
+  if (!text) { cNote("댓글 내용을 적어 주세요."); $("ctext").focus(); return; }
+  $("csend").disabled = true; cNote("");
+  try {
+    await addDoc(cCol(pid), { name, text, at: serverTimestamp() });
+    $("ctext").value = "";
+    try { localStorage.setItem("blog-nick", name); } catch (x) {}
+  } catch (x) { cNote("댓글을 등록하지 못했습니다. 잠시 뒤 다시 시도해 주세요."); }
+  $("csend").disabled = false;
+});
+$("clist").addEventListener("click", e => {
+  const b = e.target.closest("[data-cdel]"), pid = postId();
+  if (!b || !pid || !canEdit) return;
+  if (!b.dataset.sure) { b.dataset.sure = "1"; b.textContent = "정말 삭제?"; return; }
+  deleteDoc(doc(db, "posts", pid, "comments", b.dataset.cdel)).catch(() => cNote("댓글을 지우지 못했습니다."));
+});
+$("postHead").addEventListener("click", e => {
+  const b = e.target.closest("[data-post-edit]");
+  if (b) itemDialog(b.dataset.postEdit);
+});
+
+/* ───── 편집 창 ───── */
+function openDialog(title, bodyHTML, onSave) {
+  $("dialog").innerHTML = `<h2>${esc(title)}</h2><form id="dform">${bodyHTML}
+    <div class="err" id="derr"></div>
+    <div class="actions"><button type="button" class="btn" id="dcancel">취소</button><button type="submit" class="btn primary" id="dsave">저장</button></div></form>`;
+  $("overlay").hidden = false;
+  $("dcancel").onclick = closeDialog;
+  $("dform").onsubmit = async e => {
+    e.preventDefault();
+    $("dsave").disabled = true; $("derr").textContent = "";
+    try {
+      const err = await onSave();
+      if (err) { $("derr").textContent = err; $("dsave").disabled = false; } else closeDialog();
+    } catch (x) { $("derr").textContent = "저장하지 못했습니다. 다시 시도해 주세요."; $("dsave").disabled = false; }
+  };
+  const first = $("dialog").querySelector("input[type=text]");
+  if (first) first.focus();
+}
+function closeDialog() { $("overlay").hidden = true; $("dialog").innerHTML = ""; }
+
+/* 사진을 줄여서 글자(data URL)로 바꿈: 저장소 문서 크기 제한 때문에 작게 유지 */
+async function shrink(file) {
+  const bmp = await createImageBitmap(file);
+  let side = 720, q = 0.82, out = "";
+  for (let n = 0; n < 6; n++) {
+    const s = Math.min(1, side / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(bmp.width * s)); c.height = Math.max(1, Math.round(bmp.height * s));
+    const g = c.getContext("2d");
+    g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(bmp, 0, 0, c.width, c.height);
+    out = c.toDataURL("image/jpeg", q);
+    if (out.length < 600000) return out;
+    side = Math.round(side * 0.8); q -= 0.07;
+  }
+  return out.length < 900000 ? out : null;
+}
+
+function itemDialog(id) {
+  const old = posts.find(i => i.id === id);
+  let img = old ? old.img : null;
+  const picked = old ? old.tags : (current !== "전체" ? [current] : []);
+  openDialog(old ? "항목 수정" : "새 항목", `
+    <div class="field"><label for="fTitle">제목</label><input type="text" id="fTitle" maxlength="120" value="${esc(old ? old.title : "")}"></div>
+    <div class="field"><span class="lbl">태그</span><div class="checks">${
+      site.tags.length ? site.tags.map(t => `<label><input type="checkbox" value="${esc(t.name)}"${picked.includes(t.name) ? " checked" : ""}>${esc(t.symbol)} ${esc(t.name)}</label>`).join("")
+                       : "태그가 없습니다. ‘태그 관리’에서 먼저 만들어 주세요."}</div></div>
+    <div class="field"><span class="lbl">썸네일 사진</span>
+      <img class="preview" id="fPrev" alt="" ${img ? `src="${img}"` : "hidden"}>
+      <input type="file" id="fFile" accept="image/*">
+      <button type="button" class="btn" id="fClear" ${img ? "" : "hidden"}>사진 빼기</button>
+      <div style="font-size:11px;color:var(--soft);margin-top:3px">사진은 자동으로 작게 줄여 저장됩니다. 없으면 색 블록과 태그 기호로 표시됩니다.</div></div>`,
+    async () => {
+      const title = $("fTitle").value.trim();
+      if (!title) return "제목을 적어 주세요.";
+      const tags = [...$("dialog").querySelectorAll(".checks input:checked")].map(c => c.value);
+      const file = $("fFile").files[0];
+      if (file) {
+        let data = null;
+        try { data = await shrink(file); } catch (x) {}
+        if (!okImg(data)) return "이 사진은 쓸 수 없습니다. 다른 사진(JPG·PNG)으로 해 보세요.";
+        img = data;
+      }
+      if (old) await updateDoc(doc(db, "posts", id), { title, tags, img });
+      else {
+        const top = posts.length ? Math.min(...posts.map(p => p.order)) - 1 : 0;
+        await addDoc(collection(db, "posts"), { title, tags, img, order: top, created: serverTimestamp() });
+      }
+      await touch();
+    });
+  $("fFile").onchange = () => {
+    const f = $("fFile").files[0];
+    if (f) { $("fPrev").src = URL.createObjectURL(f); $("fPrev").hidden = false; $("fClear").hidden = false; }
+  };
+  $("fClear").onclick = () => { img = null; $("fFile").value = ""; $("fPrev").hidden = true; $("fClear").hidden = true; };
+}
+
+function tagDialog() {
+  const rowHTML = (t, orig) => `<div class="row" data-orig="${esc(orig)}">
+    <input type="text" class="sym" maxlength="2" value="${esc(t.symbol)}" aria-label="기호">
+    <input type="text" class="nm" maxlength="20" value="${esc(t.name)}" aria-label="태그 이름" placeholder="태그 이름">
+    <button type="button" class="btn" data-rm>✕</button></div>`;
+  openDialog("태그 관리", `
+    <div id="rows">${site.tags.map(t => rowHTML(t, t.name)).join("")}</div>
+    <button type="button" class="btn" id="addRow">＋ 태그 추가</button>
+    <div class="field" style="margin-top:12px"><span class="lbl">기호 고르기 (기호 칸을 누른 뒤 선택)</span>
+      <div class="syms">${SYMBOLS.map(s => `<button type="button" data-sym="${s}">${s}</button>`).join("")}</div></div>`,
+    async () => {
+      const rows = [...$("rows").querySelectorAll(".row")].map(r => ({
+        orig: r.dataset.orig, symbol: r.querySelector(".sym").value.trim() || "◎", name: r.querySelector(".nm").value.trim()
+      }));
+      if (rows.some(r => !r.name)) return "이름이 빈 태그가 있습니다.";
+      if (rows.some(r => r.name === "전체")) return "‘전체’는 이미 쓰이는 이름입니다.";
+      if (new Set(rows.map(r => r.name)).size !== rows.length) return "같은 이름의 태그가 있습니다.";
+      const rename = Object.fromEntries(rows.filter(r => r.orig).map(r => [r.orig, r.name]));
+      const batch = writeBatch(db);
+      const next = clone(site);
+      next.tags = rows.map(r => ({ name: r.name, symbol: r.symbol }));
+      next.updated = today();
+      batch.set(mainRef, next);
+      posts.forEach(p => {
+        const t = p.tags.filter(x => x in rename).map(x => rename[x]);
+        if (t.join("\n") !== p.tags.join("\n")) batch.update(doc(db, "posts", p.id), { tags: t });
+      });
+      await batch.commit();
+    });
+  let lastSym = null;
+  $("dialog").addEventListener("focusin", e => { if (e.target.classList.contains("sym")) lastSym = e.target; });
+  $("dialog").addEventListener("click", e => {
+    if (e.target.dataset.rm !== undefined) e.target.closest(".row").remove();
+    if (e.target.dataset.sym && lastSym && lastSym.isConnected) lastSym.value = e.target.dataset.sym;
+  });
+  $("addRow").onclick = () => {
+    $("rows").insertAdjacentHTML("beforeend", rowHTML({ name: "", symbol: "◎" }, ""));
+    $("rows").lastElementChild.querySelector(".nm").focus();
+  };
+}
+
+function siteDialog() {
+  openDialog("이름·문구", `
+    <div class="field"><label for="sName">블로그 이름</label><input type="text" id="sName" maxlength="40" value="${esc(site.name)}"></div>
+    <div class="field"><label for="sHint">이름 아래 문구</label><input type="text" id="sHint" maxlength="60" value="${esc(site.hint)}"></div>
+    <div class="field"><label for="sBtn">무작위 버튼 글자</label><input type="text" id="sBtn" maxlength="20" value="${esc(site.button)}"></div>`,
+    async () => {
+      const name = $("sName").value.trim(), hint = $("sHint").value.trim(), button = $("sBtn").value.trim();
+      if (!name) return "블로그 이름을 적어 주세요.";
+      const next = clone(site);
+      Object.assign(next, { name, hint, button: button || "아무거나 ☁", updated: today() });
+      await setDoc(mainRef, next);
+    });
+}
+
+async function removePost(id) {
+  const s = await getDocs(cCol(id));
+  for (const d of s.docs) await deleteDoc(d.ref);
+  await deleteDoc(doc(db, "posts", id));
+  await touch();
+}
+
+/* ───── 누르기 ───── */
+$("tags").addEventListener("click", e => {
+  const b = e.target.closest(".tag-btn");
+  if (!b) return;
+  current = b.dataset.tag;
+  if (postId()) location.hash = "#home"; else render();
+});
+$("lucky").addEventListener("click", () => {
+  const now = postId();
+  let pool = posts.filter(p => current === "전체" || p.tags.includes(current));
+  if (pool.length > 1) pool = pool.filter(p => p.id !== now);
+  if (pool.length) location.hash = "#post-" + pool[Math.floor(Math.random() * pool.length)].id;
+});
+$("toTop").addEventListener("click", e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); });
+
+$("editbar").addEventListener("click", e => {
+  const a = e.target.dataset.bar;
+  if (a === "start") { editing = true; render(); }
+  if (a === "done") { editing = false; render(); }
+  if (a === "add") itemDialog(null);
+  if (a === "tags") tagDialog();
+  if (a === "site") siteDialog();
+  if (a === "lps") lpDialog();
+  if (a === "radio") radioDialog();
+  if (a === "logout") signOut(auth);
+});
+$("grid").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]");
+  if (!b || !editing) return;
+  const id = b.closest(".card").dataset.id, act = b.dataset.act;
+  if (act === "edit") return itemDialog(id);
+  if (act === "del") {
+    if (b.dataset.sure) removePost(id).catch(fail);
+    else { b.dataset.sure = "1"; b.textContent = "정말 삭제?"; b.classList.add("primary"); }
+    return;
+  }
+  /* 지금 보이는 목록 안에서 한 칸 이동: 두 게시물의 순서 값을 맞바꿈 */
+  const visible = posts.filter(p => current === "전체" || p.tags.includes(current));
+  const at = visible.findIndex(p => p.id === id), other = visible[at + (act === "up" ? -1 : 1)], me = visible[at];
+  if (!other) return;
+  const batch = writeBatch(db);
+  batch.update(doc(db, "posts", me.id), { order: other.order });
+  batch.update(doc(db, "posts", other.id), { order: me.order });
+  batch.commit().catch(fail);
+});
+$("overlay").addEventListener("click", e => { if (e.target === $("overlay")) closeDialog(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("overlay").hidden) closeDialog(); });
+window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+
+/* ───── 관리자 로그인 ───── */
+$("admin").addEventListener("click", () => {
+  signInWithPopup(auth, new GoogleAuthProvider()).catch(() => note("로그인하지 못했습니다. 팝업 차단을 풀고 다시 시도해 주세요."));
+});
+onAuthStateChanged(auth, async user => {
+  canEdit = false;
+  if (user) {
+    /* 주인만 읽을 수 있는 문서를 읽어 보아 주인인지 확인 (규칙이 판정) */
+    try { await getDoc(doc(db, "private", "owner")); canEdit = true; note(""); }
+    catch (e) { note("이 계정은 블로그 주인이 아닙니다."); signOut(auth); }
+  }
+  if (!canEdit) editing = false;
+  render(); renderComments(); renderShelf();
+});
+
+/* ───── 턴테이블 ───── */
+/* 이름, 판 라벨 색, 재킷 색 */
+const LABELS = [["주황", "#ee861c", "#ffe0c2"], ["빨강", "#d9534f", "#ffd9e0"], ["파랑", "#4a7bd0", "#c9d9ff"], ["초록", "#4f9d69", "#cdeccd"], ["보라", "#8a63c9", "#e3d4f7"], ["노랑", "#e6c229", "#fff3b8"], ["갈색", "#b89455", "#f1e6c9"]];
+const lab = c => LABELS.find(l => l[1] === c) || LABELS[0];
+const tt = $("tt"), arm = $("arm"), deck = $("deck"), knob = $("knob");
+const audio = new Audio(); audio.preload = "none";
+const playerRef = doc(db, "blog", "player");
+let lps = [], stations = [], cur = null, outId = null, playing = false, wantPlay = false, radioIdx = 0;
+let ytPlayer = null, ytReady = false, ytPending = null, ytLoading = false;
+
+function ytParse(url) {
+  try {
+    const u = new URL(url), h = u.hostname.replace(/^(www|m|music)\./, "");
+    let v = null, list = u.searchParams.get("list");
+    if (h === "youtu.be") v = u.pathname.slice(1);
+    else if (h === "youtube.com") {
+      if (u.pathname === "/watch") v = u.searchParams.get("v");
+      else { const m = u.pathname.match(/^\/(embed|shorts|live)\/([\w-]+)/); if (m) v = m[2]; }
+    } else return null;
+    if (v && !/^[\w-]{6,20}$/.test(v)) v = null;
+    if (list && !/^[\w-]{6,64}$/.test(list)) list = null;
+    return v || list ? { v, list } : null;
+  } catch (e) { return null; }
+}
+const okStream = url => { try { return new URL(url).protocol === "https:"; } catch (e) { return false; } };
+
+function deckText(state, title) { $("deckState").textContent = state; $("deckTitle").textContent = title || ""; }
+function idleText() { deckText(lps.length ? "재킷을 눌러 판을 꺼내 보세요" : "아직 판이 없습니다", ""); }
+function setArm(deg) { arm.style.transform = `rotate(${deg}deg)`; }
+function uiPlaying(on) {
+  playing = on;
+  deck.classList.toggle("playing", on && !!cur);
+  setArm(on && cur ? 32 : 0);
+  if (cur) deckText(on ? "재생 중" : "멈춤 · 판을 누르면 다시 재생", cur.title);
+}
+
+/* 유튜브 */
+function ensureYT() {
+  if (ytLoading) return;
+  ytLoading = true;
+  window.onYouTubeIframeAPIReady = () => {
+    ytPlayer = new YT.Player("yt", {
+      width: "100%", height: "200", playerVars: { playsinline: 1, rel: 0 },
+      events: {
+        onReady: () => { ytReady = true; if (ytPending) { const src = ytPending; ytPending = null; ytCue(src); } },
+        onStateChange: e => {
+          if (!cur) return;
+          if (e.data === 1) uiPlaying(true);
+          else if (e.data === 2 || e.data === 0) { wantPlay = false; uiPlaying(false); }
+          else if (e.data === 5 && wantPlay) ytPlayer.playVideo();
+        },
+        onError: () => { wantPlay = false; uiPlaying(false); deckText("이 영상은 여기서 재생할 수 없습니다.", cur ? cur.title : ""); }
+      }
+    });
+  };
+  const sc = document.createElement("script");
+  sc.src = "https://www.youtube.com/iframe_api";
+  sc.onerror = () => deckText("유튜브를 불러오지 못했습니다.", cur ? cur.title : "");
+  document.head.appendChild(sc);
+}
+function ytCue(src) {
+  if (!ytReady) { ytPending = src; ensureYT(); return; }
+  if (src.v) ytPlayer.cueVideoById(src.v); else ytPlayer.cuePlaylist({ list: src.list });
+}
+function ytStop() { if (ytReady) { try { ytPlayer.pauseVideo(); } catch (e) {} } }
+
+/* 판 올리기 · 내리기 */
+function loadLP(id) {
+  const it = lps.find(x => x.id === id);
+  if (!it) return;
+  const src = ytParse(it.url);
+  if (!src) { deckText("이 판의 주소가 올바르지 않습니다.", it.title); return; }
+  setRadio(0, true);
+  ytStop();
+  cur = it; outId = null; playing = false; wantPlay = true;
+  $("discLabel").setAttribute("fill", lab(it.color)[1]);
+  $("disc").removeAttribute("hidden");
+  $("deckOff").hidden = false;
+  $("ytbox").hidden = false;
+  deck.classList.remove("playing");
+  setArm(32);
+  deckText("불러오는 중...", it.title);
+  ytCue(src);
+  renderShelf();
+}
+function unloadLP() {
+  wantPlay = false; ytStop(); ytPending = null;
+  cur = null; playing = false;
+  deck.classList.remove("playing"); setArm(0);
+  $("disc").setAttribute("hidden", "");
+  $("ytbox").hidden = true; $("deckOff").hidden = true;
+  if (!radioIdx) idleText();
+  renderShelf();
+}
+function play() { if (!cur) return; wantPlay = true; setArm(32); if (ytReady) { try { ytPlayer.playVideo(); } catch (e) {} } }
+function pause() { wantPlay = false; ytStop(); uiPlaying(false); }
+
+/* 끌기: 재킷(또는 삐져나온 판)을 끌어 턴테이블에 놓기, 올려진 판을 끌어내기 */
+const overPlatter = e => {
+  const r = $("platter").getBoundingClientRect();
+  return Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) <= r.width / 2 + 16;
+};
+function makeGhost(color, e) {
+  const g = document.createElement("div");
+  g.className = "lp-ghost"; g.style.setProperty("--c", lab(color)[1]);
+  g.style.left = e.clientX + "px"; g.style.top = e.clientY + "px";
+  document.body.appendChild(g);
+  return g;
+}
+function dragSource(el, pick, drop) {
+  let d = null, skipClick = false;
+  el.addEventListener("pointerdown", e => {
+    const it = pick(e);
+    if (!it) return;
+    d = { it, x: e.clientX, y: e.clientY, ghost: null };
+    try { (e.target.closest(".lp") || el).setPointerCapture(e.pointerId); } catch (x) {}
+  });
+  el.addEventListener("pointermove", e => {
+    if (!d) return;
+    if (!d.ghost && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 6) d.ghost = makeGhost(d.it.color, e);
+    if (d.ghost) { d.ghost.style.left = e.clientX + "px"; d.ghost.style.top = e.clientY + "px"; }
+  });
+  const end = e => {
+    if (!d) return;
+    const dragged = !!d.ghost, it = d.it;
+    if (d.ghost) d.ghost.remove();
+    d = null;
+    if (dragged) { skipClick = true; setTimeout(() => { skipClick = false; }, 0); if (e.type === "pointerup") drop(it, overPlatter(e), true); }
+  };
+  el.addEventListener("pointerup", end);
+  el.addEventListener("pointercancel", end);
+  el.addEventListener("click", e => {
+    if (skipClick) { skipClick = false; return; }
+    const it = pick(e);
+    if (it) drop(it, true, false);
+  });
+}
+dragSource($("shelf"), e => { const b = e.target.closest(".lp"); return b ? lps.find(x => x.id === b.dataset.id) : null; },
+  (it, onPlatter, dragged) => {
+    if (cur && cur.id === it.id) return;
+    if (dragged) { if (onPlatter) loadLP(it.id); }
+    else if (outId !== it.id) {                                    /* 첫 번째 누름: 판이 재킷에서 나옴 */
+      outId = it.id;
+      $("shelf").querySelectorAll(".lp").forEach(b => b.classList.toggle("out", b.dataset.id === outId));
+    }
+    else loadLP(it.id);                                            /* 나온 판을 한 번 더 누름: 올리기 */
+  });
+const discToggle = () => { if (playing || wantPlay) pause(); else play(); };
+dragSource($("disc"), () => cur, (it, onPlatter, dragged) => { if (dragged) { if (!onPlatter) unloadLP(); } else discToggle(); });
+$("disc").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); discToggle(); } });
+$("deckOff").addEventListener("click", unloadLP);
+$("deckToggle").addEventListener("click", () => {
+  const open = deck.classList.toggle("open");
+  $("deckToggle").setAttribute("aria-expanded", String(open));
+});
+
+/* 라디오 다이얼: 맨 왼쪽이 꺼짐, 오른쪽으로 돌릴수록 다음 방송 */
+const knobAngle = i => stations.length ? -120 + 240 * i / stations.length : 0;
+function setRadio(i, quiet) {
+  radioIdx = Math.max(0, Math.min(stations.length, i));
+  const st = stations[radioIdx - 1];
+  knob.classList.remove("drag");
+  knob.style.transform = `rotate(${knobAngle(radioIdx)}deg)`;
+  knob.setAttribute("aria-valuemax", String(stations.length));
+  knob.setAttribute("aria-valuenow", String(radioIdx));
+  knob.setAttribute("aria-valuetext", st ? st.name : "꺼짐");
+  $("radioWin").textContent = st ? "◎ " + st.name : "라디오 꺼짐";
+  if (!st) {
+    try { audio.pause(); } catch (e) {}
+    audio.removeAttribute("src");
+    if (!quiet && !cur) idleText();
+    return;
+  }
+  if (cur) unloadLP();
+  deckText("라디오 연결 중...", st.name);
+  audio.src = st.url;
+  audio.play().catch(() => { if (stations[radioIdx - 1] === st) deckText("이 방송은 지금 들을 수 없습니다.", st.name); });
+}
+audio.addEventListener("playing", () => { const st = stations[radioIdx - 1]; if (st) deckText("라디오 재생 중", st.name); });
+audio.addEventListener("error", () => { const st = stations[radioIdx - 1]; if (st) deckText("이 방송은 지금 들을 수 없습니다.", st.name); });
+let kd = null;
+knob.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  try { knob.setPointerCapture(e.pointerId); } catch (x) {}
+  kd = { x: e.clientX, y: e.clientY, moved: false, a: knobAngle(radioIdx) };
+});
+knob.addEventListener("pointermove", e => {
+  if (!kd) return;
+  if (Math.hypot(e.clientX - kd.x, e.clientY - kd.y) > 4) kd.moved = true;
+  if (!kd.moved) return;
+  const r = knob.getBoundingClientRect();
+  const a = Math.atan2(e.clientX - (r.left + r.width / 2), -(e.clientY - (r.top + r.height / 2))) * 180 / Math.PI;
+  kd.a = Math.max(-120, Math.min(120, a));
+  knob.classList.add("drag");
+  knob.style.transform = `rotate(${kd.a}deg)`;
+});
+knob.addEventListener("pointerup", () => {
+  if (!kd) return;
+  const n = stations.length, k = kd; kd = null;
+  if (!n) return setRadio(0);
+  setRadio(k.moved ? Math.round((k.a + 120) / 240 * n) : (radioIdx + 1) % (n + 1));
+});
+knob.addEventListener("pointercancel", () => { kd = null; setRadio(radioIdx, true); });
+knob.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight" || e.key === "ArrowUp") { e.preventDefault(); setRadio(radioIdx + 1); }
+  if (e.key === "ArrowLeft" || e.key === "ArrowDown") { e.preventDefault(); setRadio(radioIdx - 1); }
+});
+
+function renderShelf() {
+  $("shelf").innerHTML = lps.length ? lps.map(x => {
+    const l = lab(x.color), on = cur && cur.id === x.id;
+    return `<button type="button" class="lp${outId === x.id ? " out" : ""}${on ? " on" : ""}" data-id="${esc(x.id)}" aria-label="${esc(x.title)}${on ? " (올려져 있음)" : outId === x.id ? " (판이 나와 있음: 한 번 더 누르면 올리기)" : ""}">
+      <span class="lp-disc" style="--c:${l[1]}"></span><span class="sleeve" style="background:${l[2]}"><span class="sl-title">${esc(x.title)}</span></span></button>`;
+  }).join("") : `<p class="cempty">${canEdit ? "‘✎ 편집 → LP 관리’에서 판을 추가해 주세요." : "아직 판이 없습니다."}</p>`;
+  $("radio").hidden = !stations.length && !canEdit;
+  if (!stations.length) $("radioWin").textContent = canEdit ? "‘라디오 관리’에서 방송을 추가해 주세요" : "라디오 꺼짐";
+}
+
+function lpDialog() {
+  const rowHTML = x => `<div class="field lprow" data-id="${esc(x.id)}" style="border:1px dotted #bbb;padding:6px">
+    <div class="row"><input type="text" class="nm lt" maxlength="40" value="${esc(x.title)}" placeholder="제목 (재킷에 적힐 이름)" aria-label="제목">
+      <button type="button" class="btn" data-rm>✕</button></div>
+    <div class="row"><input type="text" class="nm lu" maxlength="300" value="${esc(x.url)}" placeholder="유튜브 영상 또는 재생목록 주소" aria-label="유튜브 주소"></div>
+    <div class="row" style="margin:0"><select class="lc" aria-label="색">${LABELS.map(l => `<option value="${l[1]}"${lab(x.color)[1] === l[1] ? " selected" : ""}>${l[0]}</option>`).join("")}</select></div></div>`;
+  openDialog("LP 관리", `<div id="lprows">${lps.map(rowHTML).join("")}</div>
+    <button type="button" class="btn" id="addLp">＋ 판 추가</button>`,
+    async () => {
+      const rows = [...$("lprows").querySelectorAll(".lprow")].map(r => ({
+        id: r.dataset.id, title: r.querySelector(".lt").value.trim(), url: r.querySelector(".lu").value.trim(), color: lab(r.querySelector(".lc").value)[1]
+      }));
+      if (rows.some(r => !r.title)) return "제목이 빈 판이 있습니다.";
+      const bad = rows.find(r => !ytParse(r.url));
+      if (bad) return `‘${bad.title}’의 주소가 유튜브 주소가 아닙니다.`;
+      await setDoc(playerRef, { items: rows }, { merge: true });
+    });
+  $("dialog").addEventListener("click", e => { if (e.target.dataset.rm !== undefined) e.target.closest(".lprow").remove(); });
+  $("addLp").onclick = () => {
+    const n = $("lprows").querySelectorAll(".lprow").length;
+    $("lprows").insertAdjacentHTML("beforeend", rowHTML({ id: "l" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), title: "", url: "", color: LABELS[n % LABELS.length][1] }));
+    $("lprows").lastElementChild.querySelector(".lt").focus();
+  };
+}
+function radioDialog() {
+  const rowHTML = x => `<div class="field strow" style="border:1px dotted #bbb;padding:6px">
+    <div class="row"><input type="text" class="nm sn" maxlength="30" value="${esc(x.name)}" placeholder="방송 이름" aria-label="방송 이름">
+      <button type="button" class="btn" data-rm>✕</button></div>
+    <div class="row" style="margin:0"><input type="text" class="nm su" maxlength="300" value="${esc(x.url)}" placeholder="https로 시작하는 방송 재생 주소" aria-label="방송 주소"></div></div>`;
+  openDialog("라디오 관리", `<div id="strows">${stations.map(rowHTML).join("")}</div>
+    <button type="button" class="btn" id="addSt">＋ 방송 추가</button>
+    <div style="font-size:11px;color:var(--soft);margin-top:8px;line-height:1.5">다이얼을 오른쪽으로 돌릴 때 위에서부터 차례로 나옵니다. 방송국 홈페이지 주소가 아니라, 인터넷 라디오의 재생(스트림) 주소를 넣어야 합니다.</div>`,
+    async () => {
+      const rows = [...$("strows").querySelectorAll(".strow")].map(r => ({ name: r.querySelector(".sn").value.trim(), url: r.querySelector(".su").value.trim() }));
+      if (rows.some(r => !r.name)) return "이름이 빈 방송이 있습니다.";
+      const bad = rows.find(r => !okStream(r.url));
+      if (bad) return `‘${bad.name}’의 주소는 https로 시작해야 합니다.`;
+      await setDoc(playerRef, { stations: rows }, { merge: true });
+    });
+  $("dialog").addEventListener("click", e => { if (e.target.dataset.rm !== undefined) e.target.closest(".strow").remove(); });
+  $("addSt").onclick = () => {
+    $("strows").insertAdjacentHTML("beforeend", rowHTML({ name: "", url: "" }));
+    $("strows").lastElementChild.querySelector(".sn").focus();
+  };
+}
+
+deckText("불러오는 중...", "");
+onSnapshot(playerRef, s => {
+  const d = s.exists() ? s.data() : {};
+  lps = (Array.isArray(d.items) ? d.items : []).filter(x => x && x.id && x.title && x.url)
+    .map(x => ({ id: String(x.id), title: String(x.title), url: String(x.url), color: lab(x.color)[1] }));
+  const playingSt = stations[radioIdx - 1];
+  stations = (Array.isArray(d.stations) ? d.stations : []).filter(x => x && x.name && okStream(x.url)).map(x => ({ name: String(x.name), url: String(x.url) }));
+  if (playingSt) {
+    const at = stations.findIndex(x => x.url === playingSt.url);
+    if (at < 0) setRadio(0, true); else { radioIdx = at + 1; knob.style.transform = `rotate(${knobAngle(radioIdx)}deg)`; }
+  }
+  if (cur) {
+    const still = lps.find(x => x.id === cur.id);
+    if (!still || still.url !== cur.url) unloadLP(); else { cur = still; $("discLabel").setAttribute("fill", lab(cur.color)[1]); $("deckTitle").textContent = cur.title; }
+  } else if (!radioIdx) idleText();
+  if (outId && !lps.some(x => x.id === outId)) outId = null;
+  renderShelf();
+}, () => deckText("판 목록을 불러오지 못했습니다.", ""));
+
+/* ───── 시작 ───── */
+render();
+onSnapshot(mainRef, s => { site = normSite(s.exists() ? s.data() : null); render(); },
+  () => note("내용을 불러오지 못했습니다."));
+onSnapshot(query(collection(db, "posts"), orderBy("order")), s => {
+  posts = s.docs.map(d => {
+    const x = d.data();
+    return { id: d.id, title: String(x.title || ""), tags: Array.isArray(x.tags) ? x.tags.map(String) : [], img: okImg(x.img) ? x.img : null, order: Number(x.order) || 0 };
+  });
+  loaded = true; render();
+}, () => note("내용을 불러오지 못했습니다."));
+</script>
+</body>
+</html>
